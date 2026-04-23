@@ -1,0 +1,596 @@
+%% This section creates toy data.
+%
+% It should be replaced by actual experimental data. The data should be
+% joined in three arrays of the following sizes (for the Romo-like task):
+%
+% trialNum: N x S x D
+% firingRates: N x S x D x T x maxTrialNum
+% firingRatesAverage: N x S x D x T
+%
+% N is the number of neurons
+% S is the number of stimuli conditions (F1 frequencies in Romo's task)
+% D is the number of decisions (D=2)
+% T is the number of time-points (note that all the trials should have the
+% same length in time!)
+%
+% trialNum -- number of trials for each neuron in each S,D condition (is
+% usually different for different conditions and different sessions)
+%
+% firingRates -- all single-trial data together, massive array. Here
+% maxTrialNum is the maximum value in trialNum. E.g. if the number of
+% trials per condition varied between 1 and 20, then maxTrialNum = 20. For
+% the neurons and conditions with less trials, fill remaining entries in
+% firingRates with zeros or nans.
+%
+% firingRatesAverage -- average of firingRates over trials (5th dimension).
+% If the firingRates is filled up with nans, then it's simply
+%    firingRatesAverage = nanmean(firingRates,5)
+% If it's filled up with zeros (as is convenient if it's stored on hard 
+% drive as a sparse matrix), then 
+%    firingRatesAverage = bsxfun(@times, mean(firingRates,5), size(firingRates,5)./trialNum)
+
+clear all; close all; 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% path of all dpca core code %%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+addpath("/Users/tianwang/Documents/MATLAB/ChandLab/dPCA/matlab");
+
+
+
+% 
+% % for DLPFC data
+% a = load('/Volumes/TianSSD/TiberiusNpix/targetAligned/DLPFCtotalDataframeT.mat').totalDataframe;
+% b = load('/Volumes/TianSSD/TiberiusNpix/checkerboardAligned/DLPFCtotalDataframeC.mat').totalDataframe;
+% 
+% c = load('/Volumes/TianSSD/TiberiusDLPFCforDPCA/targetAligned/totalDataframeT.mat').totalDataframe;
+% d = load('/Volumes/TianSSD/TiberiusDLPFCforDPCA/checkerboardAligned/totalDataframeC.mat').totalDataframe;
+% 
+% e = load('/Volumes/TianSSD/VinnieNpix/targetAligned/DLPFCtotalDataframeT.mat').totalDataframe;
+% f = load('/Volumes/TianSSD/VinnieNpix/checkerboardAligned/DLPFCtotalDataframeC.mat').totalDataframe;
+% 
+% g = load('/Volumes/ZiggySSD/VinnieDLPFCforDPCA/targetAligned/totalDataframeT.mat').totalDataframe;
+% h = load('/Volumes/ZiggySSD/VinnieDLPFCforDPCA/checkerboardAligned/totalDataframeC.mat').totalDataframe;
+% 
+% 
+% %%
+% 
+% frTN = cat(4, a(:,:,:,101:900), b(:,:,:,801:1300));
+% 
+% frTV = cat(4, c(:,:,:,301:1100), d(:,:,:,801:1300));
+% 
+% frVN = cat(4, e(:,:,:,101:900), f(:,:,:,801:1300));
+% 
+% frVV = cat(4, g(:,:,:,301:1100), h(:,:,:,801:1300));
+% 
+% firingRatesAverage = [frTN; frTV; frVN; frVV];
+% 
+% 
+% % 
+% % frTN = cat(4, a(:,:,:,101:800), b(:,:,:,801:1300));
+% % 
+% % frTV = cat(4, c(:,:,:,501:1200), d(:,:,:,801:1300));
+% % 
+% % frVN = cat(4, e(:,:,:,101:800), f(:,:,:,801:1300));
+% % 
+% % frVV = cat(4, g(:,:,:,501:1200), h(:,:,:,801:1300));
+% 
+% % firingRatesAverage = [frTN; frTV; frVN; frVV];
+% 
+% %% for pmd data 
+% 
+% 
+% a = load('/Volumes/TianSSD/PMd/PMdData/Tiberius/PMDtotalDataframeT.mat').totalDataframe;
+% b = load('/Volumes/TianSSD/PMd/PMdData/Tiberius/PMDtotalDataframeC.mat').totalDataframe;
+% 
+% c = load('/Volumes/TianSSD/PMd/PMdData/Olaf/PMDtotalDataframeT.mat').totalDataframe;
+% d = load('/Volumes/TianSSD/PMd/PMdData/Olaf/PMDtotalDataframeC.mat').totalDataframe;
+% 
+% e = load('/Volumes/TianSSD/TiberiusNpix/targetAligned/PMDtotalDataframeT.mat').totalDataframe;
+% f = load('/Volumes/TianSSD/TiberiusNpix/checkerboardAligned/PMDtotalDataframeC.mat').totalDataframe;
+% 
+% 
+% frTN = cat(4, e(:,:,:,101:900), f(:,:,:,801:1300));
+% 
+% frTV = cat(4, a(:,:,:,101:900), b(:,:,:,801:1300));
+% 
+% frOV = cat(4, c(:,:,:,101:900), d(:,:,:,801:1300));
+% 
+% firingRatesAverage = [frTN; frTV; frOV];
+% 
+
+
+%% 
+
+clear all; close all; 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%% path of all dpca core code %%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+addpath("/Users/tianwang/Documents/MATLAB/ChandLab/dPCA/matlab");
+
+
+
+
+% for DLPFC data
+a = load('/Volumes/TianSSD/TiberiusNpix/targetAligned/DLPFC_T_ColorCxtCorrect.mat').totalDataframe;
+b = load('/Volumes/TianSSD/TiberiusNpix/checkerboardAligned/DLPFC_C_ColorCxtCorrect.mat').totalDataframe;
+
+c = load('/Volumes/TianSSD/TiberiusDLPFCforDPCA/targetAligned/DLPFC_T_ColorCxtCorrect.mat').totalDataframe;
+d = load('/Volumes/TianSSD/TiberiusDLPFCforDPCA/checkerboardAligned/DLPFC_C_ColorCxtCorrect.mat').totalDataframe;
+
+e = load('/Volumes/TianSSD/VinnieNpix/targetAligned/DLPFC_T_ColorCxtCorrect.mat').totalDataframe;
+f = load('/Volumes/TianSSD/VinnieNpix/checkerboardAligned/DLPFC_C_ColorCxtCorrect.mat').totalDataframe;
+
+g = load('/Volumes/ZiggySSD/VinnieDLPFCforDPCA/targetAligned/DLPFC_T_ColorCxtCorrect.mat').totalDataframe;
+h = load('/Volumes/ZiggySSD/VinnieDLPFCforDPCA/checkerboardAligned/DLPFC_C_ColorCxtCorrect.mat').totalDataframe;
+
+
+%%
+
+frTN = cat(4, a(:,:,:,101:900), b(:,:,:,801:1300));
+
+frTV = cat(4, c(:,:,:,301:1100), d(:,:,:,801:1300));
+
+frVN = cat(4, e(:,:,:,101:900), f(:,:,:,801:1300));
+
+frVV = cat(4, g(:,:,:,301:1100), h(:,:,:,801:1300));
+
+firingRatesAverage = [frTN; frTV; frVN; frVV];
+
+
+
+%% for pmd data 
+
+
+a = load('/Volumes/TianSSD/PMd/PMdData/Tiberius/PMD_T_ColorCxtCorrect.mat').totalDataframe;
+b = load('/Volumes/TianSSD/PMd/PMdData/Tiberius/PMD_C_ColorCxtCorrect.mat').totalDataframe;
+
+c = load('/Volumes/TianSSD/PMd/PMdData/Olaf/PMD_T_ColorCxtCorrect.mat').totalDataframe;
+d = load('/Volumes/TianSSD/PMd/PMdData/Olaf/PMD_C_ColorCxtCorrect.mat').totalDataframe;
+
+e = load('/Volumes/TianSSD/TiberiusNpix/targetAligned/PMD_T_ColorCxtCorrect.mat').totalDataframe;
+f = load('/Volumes/TianSSD/TiberiusNpix/checkerboardAligned/PMD_C_ColorCxtCorrect.mat').totalDataframe;
+
+
+frTN = cat(4, e(:,:,:,101:900), f(:,:,:,801:1300));
+
+frTV = cat(4, a(:,:,:,101:900), b(:,:,:,801:1300));
+
+frOV = cat(4, c(:,:,:,101:900), d(:,:,:,801:1300));
+
+firingRatesAverage = [frTN; frTV; frOV];
+
+
+
+
+%% only extract cxt signal
+
+% combinedParams = {{3}, {[1 2], [1 2 3]}};
+% margNames = { 'Condition-independent', 'S/D Interaction'};
+% margColours = [150 150 150; 114 97 171]/256;
+% 
+% % time of  target aligned
+% time = linspace(-0.2, 0.7, size(firingRatesAverage, 4));
+% timeEvents = [0];
+%% Define parameter grouping
+
+% *** Don't change this if you don't know what you are doing! ***
+% firingRates array has [N S D T E] size; herewe ignore the 1st dimension 
+% (neurons), i.e. we have the following parameters:
+%    1 - stimulus 
+%    2 - decision
+%    3 - time
+% There are three pairwise interactions:
+%    [1 3] - stimulus/time interaction
+%    [2 3] - decision/time interaction
+%    [1 2] - stimulus/decision interaction
+% And one three-way interaction:
+%    [1 2 3] - rest
+% As explained in the eLife paper, we group stimulus with stimulus/time interaction etc.:
+
+combinedParams = {{1, [1 3]}, {2, [2 3]}, {3}, {[1 2], [1 2 3]}};
+margNames = {'Stimulus', 'Decision', 'Condition-independent', 'S/D Interaction'};
+
+% margNames = {'SC', 'Configuration', 'Condition-independent', 'C/D Interaction'};
+
+margColours = [23 100 171; 187 20 25; 150 150 150; 114 97 171]/256;
+
+% For two parameters (e.g. stimulus and time, but no decision), we would have
+% firingRates array of [N S T E] size (one dimension less, and only the following
+% possible marginalizations:
+%    1 - stimulus
+%    2 - time
+%    [1 2] - stimulus/time interaction
+% They could be grouped as follows: 
+%    combinedParams = {{1, [1 2]}, {2}};
+
+% Time events of interest (e.g. stimulus onset/offset, cues etc.)
+% They are marked on the plots with vertical lines
+
+
+% time of checkerbaord and movement aligned
+% time = linspace(-0.8, 0.8, size(firingRatesAverage, 4));
+% timeEvents = [0];
+
+% time of  target aligned
+% time = linspace(-0.2, 1.2, size(firingRatesAverage, 4));
+% timeEvents = [0];
+
+
+% time of combined T and C data
+time = linspace(-0.1, 1.2, size(firingRatesAverage, 4));
+timeEvents = [0, 0.7];
+
+
+
+%% Step 1: PCA of the dataset
+
+X = firingRatesAverage(:,:);
+X = bsxfun(@minus, X, mean(X,2));
+
+[W,~,~] = svd(X, 'econ');
+W = W(:,1:20);
+
+% minimal plotting
+% dpca_plot(firingRatesAverage, W, W, @dpca_plot_default);
+
+% computing explained variance
+explVar2 = dpca_explainedVariance(firingRatesAverage, W, W, ...
+    'combinedParams', combinedParams);
+
+% a bit more informative plotting
+dpca_plot(firingRatesAverage, W, W, @dpca_plot_default, ...
+    'explainedVar', explVar, ...
+    'time', time,                        ...
+    'timeEvents', timeEvents,               ...
+    'marginalizationNames', margNames, ...
+    'marginalizationColours', margColours);
+
+% print('-painters','-depsc',['~/Documents/MATLAB/ChandLab/DLPFC_analysis/resultFigures/DLPFC_pca/', 'pcaAll','.eps'], '-r300');
+% savefig(['~/Documents/MATLAB/ChandLab/DLPFC_analysis/resultFigures/DLPFC_pca/', 'pcaAll','.fig']);
+
+%% Step 2: PCA in each marginalization separately
+
+dpca_perMarginalization(firingRatesAverage, @dpca_plot_default, ...
+   'combinedParams', combinedParams);
+
+%% Step 3: dPCA without regularization and ignoring noise covariance
+
+% This is the core function.
+% W is the decoder, V is the encoder (ordered by explained variance),
+% whichMarg is an array that tells you which component comes from which
+% marginalization
+
+tic
+[W,V,whichMarg] = dpca(firingRatesAverage, 30, ...
+    'combinedParams', combinedParams);
+toc
+
+explVar = dpca_explainedVariance(firingRatesAverage, W, V, ...
+    'combinedParams', combinedParams);
+
+z = dpca_plot(firingRatesAverage, W, V, @dpca_plot_default, ...
+    'explainedVar', explVar, ...
+    'marginalizationNames', margNames, ...
+    'marginalizationColours', margColours, ...
+    'whichMarg', whichMarg,                 ...
+    'time', time,                        ...
+    'timeEvents', timeEvents,               ...
+    'timeMarginalization', 3, ...
+    'legendSubplot', 16, ...
+    'numCompToShow', 20);
+
+print('-painters','-depsc',['~/Desktop/', 'dpca_pfc_colorcxt','.eps'], '-r300');
+% savefig(['~/Documents/MATLAB/ChandLab/DLPFC_analysis/resultFigures/DLPFC_dpca/', 'dpca_A','.fig']);
+
+
+
+%% 
+
+
+(explVar.totalMarginalizedVar)./(explVar.totalVar)
+
+%% project raw data to dpca directions
+
+WT = W';
+
+proj = [];
+
+for ii = 1:size(firingRatesAverage,2)
+    for jj = 1:size(firingRatesAverage,3)
+        proj(:,ii, jj, :) = WT * squeeze(firingRatesAverage(:,ii, jj, :));
+    end
+end
+
+
+%% plot V projections on direct, context and color directions
+
+% traj 1st dimension: 
+% 1: project to direction
+% 2: project to context
+% 3: project to color
+
+traj = proj([4, 8, 11], :,:,:);
+
+t = linspace(-0.1,1.2, size(firingRatesAverage,4));
+
+figure; 
+
+% context
+subplot(1,3,1), hold on
+plot(t, squeeze(traj(2,1,1,:)), 'r', 'linewidth', 2)
+plot(t, squeeze(traj(2,1,2,:)), 'r--', 'linewidth', 2)
+plot(t, squeeze(traj(2,2,1,:)), 'g', 'linewidth', 2)
+plot(t, squeeze(traj(2,2,2,:)), 'g--', 'linewidth', 2)
+xline(0, '--');
+xline(0.735, '--');
+xlabel('Time(s)')
+ylabel('Projection (a.u.)')
+title('dPCA context axis')
+xlim([-0.1 1.2])
+set(gca,'tickdir','out','fontsize',12);
+set(gca,'linewidth',2)
+set(gca,'fontsize',18)
+
+% color
+subplot(1,3,2), hold on
+plot(t, squeeze(traj(3,1,1,:)), 'r', 'linewidth', 2)
+plot(t, squeeze(traj(3,1,2,:)), 'r--', 'linewidth', 2)
+plot(t, squeeze(traj(3,2,1,:)), 'g', 'linewidth', 2)
+plot(t, squeeze(traj(3,2,2,:)), 'g--', 'linewidth', 2)
+xline(0, '--');
+xline(0.735, '--');
+xlim([-0.1 1.2])
+xlabel('Time(s)')
+title('Color axis')
+set(gca,'tickdir','out','fontsize',12);
+set(gca,'linewidth',2)
+set(gca,'fontsize',18)
+
+% direction
+subplot(1,3,3), hold on
+plot(t, squeeze(traj(1,1,1,:)), 'r', 'linewidth', 2);
+plot(t, squeeze(traj(1,1,2,:)), 'r--', 'linewidth', 2)
+plot(t, squeeze(traj(1,2,1,:)), 'g', 'linewidth', 2)
+plot(t, squeeze(traj(1,2,2,:)), 'g--', 'linewidth', 2)
+xline(0, '--');
+xline(0.735, '--');
+xlim([-0.1 1.2])
+xlabel('Time(s)')
+title('Direction axis')
+set(gca,'tickdir','out','fontsize',12);
+set(gca,'linewidth',2)
+set(gca,'fontsize',18)
+
+set(gcf,'position',[100,100,1500,400])
+set(gcf,'color','w');
+
+% print('-painters','-depsc',['~/Desktop/', 'Vproj','.eps'], '-r300');
+
+%% calculate angle between axises
+figure;
+X1(1) = dot(V(:,4), V(:,8)) % Choice and Context
+X1(2) = dot(V(:,4), V(:,11)) % Choice and Color
+X1(3) = dot(V(:,11), V(:,8)) % Context and Color
+bar(X1)
+ylim([-1 1])
+set(gca,'XTickLabel',{'Choice and Context','Choice and Color','Context and Color'});
+
+text(1:length(X1),X1,num2str(X1'),'vert','bottom','horiz','center'); 
+box off
+%% Step 4: dPCA with regularization
+
+% This function takes some minutes to run. It will save the computations 
+% in a .mat file with a given name. Once computed, you can simply load 
+% lambdas out of this file:
+%   load('tmp_optimalLambdas.mat', 'optimalLambda')
+
+% Please note that this now includes noise covariance matrix Cnoise which
+% tends to provide substantial regularization by itself (even with lambda set
+% to zero).
+
+optimalLambda = dpca_optimizeLambda(firingRatesAverage, firingRates, trialNum, ...
+    'combinedParams', combinedParams, ...
+    'simultaneous', ifSimultaneousRecording, ...
+    'numRep', 2, ...  % increase this number to ~10 for better accuracy
+    'filename', 'tmp_optimalLambdas.mat');
+
+Cnoise = dpca_getNoiseCovariance(firingRatesAverage, ...
+    firingRates, trialNum, 'simultaneous', ifSimultaneousRecording);
+
+[W,V,whichMarg] = dpca(firingRatesAverage, 20, ...
+    'combinedParams', combinedParams, ...
+    'lambda', optimalLambda, ...
+    'Cnoise', Cnoise);
+
+explVar = dpca_explainedVariance(firingRatesAverage, W, V, ...
+    'combinedParams', combinedParams);
+
+dpca_plot(firingRatesAverage, W, V, @dpca_plot_default, ...
+    'explainedVar', explVar, ...
+    'marginalizationNames', margNames, ...
+    'marginalizationColours', margColours, ...
+    'whichMarg', whichMarg,                 ...
+    'time', time,                        ...
+    'timeEvents', timeEvents,               ...
+    'timeMarginalization', 3,           ...
+    'legendSubplot', 16);
+
+%% Optional: estimating "signal variance"
+
+explVar = dpca_explainedVariance(firingRatesAverage, W, V, ...
+    'combinedParams', combinedParams, ...
+    'Cnoise', Cnoise, 'numOfTrials', trialNum);
+
+% Note how the pie chart changes relative to the previous figure.
+% That is because it is displaying percentages of (estimated) signal PSTH
+% variances, not total PSTH variances. See paper for more details.
+
+dpca_plot(firingRatesAverage, W, V, @dpca_plot_default, ...
+    'explainedVar', explVar, ...
+    'marginalizationNames', margNames, ...
+    'marginalizationColours', margColours, ...
+    'whichMarg', whichMarg,                 ...
+    'time', time,                        ...
+    'timeEvents', timeEvents,               ...
+    'timeMarginalization', 3,           ...
+    'legendSubplot', 16);
+
+%% Optional: decoding
+
+decodingClasses = {[(1:S)' (1:S)'], repmat([1:2], [S 1]), [], [(1:S)' (S+(1:S))']};
+
+accuracy = dpca_classificationAccuracy(firingRatesAverage, firingRates, trialNum, ...
+    'lambda', optimalLambda, ...
+    'combinedParams', combinedParams, ...
+    'decodingClasses', decodingClasses, ...
+    'simultaneous', ifSimultaneousRecording, ...
+    'numRep', 5, ...        % increase to 100
+    'filename', 'tmp_classification_accuracy.mat');
+
+dpca_classificationPlot(accuracy, [], [], [], decodingClasses)
+
+accuracyShuffle = dpca_classificationShuffled(firingRates, trialNum, ...
+    'lambda', optimalLambda, ...
+    'combinedParams', combinedParams, ...
+    'decodingClasses', decodingClasses, ...
+    'simultaneous', ifSimultaneousRecording, ...
+    'numRep', 5, ...        % increase to 100
+    'numShuffles', 20, ...  % increase to 100 (takes a lot of time)
+    'filename', 'tmp_classification_accuracy.mat');
+
+dpca_classificationPlot(accuracy, [], accuracyShuffle, [], decodingClasses)
+
+componentsSignif = dpca_signifComponents(accuracy, accuracyShuffle, whichMarg);
+
+dpca_plot(firingRatesAverage, W, V, @dpca_plot_default, ...
+    'explainedVar', explVar, ...
+    'marginalizationNames', margNames, ...
+    'marginalizationColours', margColours, ...
+    'whichMarg', whichMarg,                 ...
+    'time', time,                        ...
+    'timeEvents', timeEvents,               ...
+    'timeMarginalization', 3,           ...
+    'legendSubplot', 16,                ...
+    'componentsSignif', componentsSignif);
+
+
+%% plot color axis of SC_Context dpca 
+
+WT = W';
+proj = [];
+
+for ii = 1:14
+    for jj = 1:2
+        proj(:,ii, jj, :) = WT * squeeze(firingRatesAverage(:,ii, jj, :));
+    end
+end
+
+% projection axis
+traj = squeeze(proj(9,:,:,:));
+cc = [summer(14/2); flipud(autumn(14/2))];
+
+figure;
+dist = [];
+
+for ii = 1:7
+    % figure;
+    hold on
+    plot(squeeze(traj(ii,1,:)), '-', 'color', cc(ii,:), 'linewidth', 3);
+    plot(squeeze(traj(14-ii+1,1,:)), '-', 'color', cc(14-ii+1,:), 'linewidth', 3);
+    dist(ii,:) = squeeze(abs(traj(ii,1,:) - traj(14-ii+1,1,:)));   
+    pause()
+    % close all
+end
+
+figure;
+for ii = 1:7
+    % figure;
+    hold on
+    plot(squeeze(traj(ii,2,:)), '--', 'color', cc(ii,:), 'linewidth', 3);
+    plot(squeeze(traj(14-ii+1,2,:)), '--', 'color', cc(14-ii+1,:), 'linewidth', 3);
+    dist(ii,:) = squeeze(abs(traj(ii,1,:) - traj(14-ii+1,1,:)));   
+    pause()
+    % close all
+end
+
+
+
+%%
+figure; hold on
+pairs = [1:7]';
+pairs(:,2) = 14-pairs(:,1)+1
+X1 = [];
+for j=1:size(pairs,1)
+        X1(j,:) = (squeeze(nanmean(traj(pairs(j,1),1:2,:),2)-nanmean(traj(pairs(j,2),1:2,:),2)))
+        % plot(X1, '-', 'linewidth',2);
+end
+
+%% plot 3D plot based on SC 
+
+
+WT = V';
+proj = [];
+
+for ii = 1:14
+    for jj = 1:2
+        proj(:,ii, jj, :) = WT * squeeze(firingRatesAverage(:,ii, jj, :));
+    end
+end
+
+traj = proj([7 3 10],:,:,:);
+cc = [summer(14/2); flipud(autumn(14/2))];
+
+figure;
+
+for ii = 1:14
+        plot3(squeeze(traj(1, ii,1,:)), squeeze(traj(2, ii,1,:)), squeeze(traj(3, ii,1,:)),'-', 'color', cc(ii,:), 'linewidth', 2);
+        hold on
+        plot3(squeeze(traj(1, ii,2,:)), squeeze(traj(2, ii,2,:)), squeeze(traj(3, ii,2,:)),'--', 'color', cc(ii,:), 'linewidth', 2);
+        
+        plot3(squeeze(traj(1, ii,1,400)), squeeze(traj(2, ii,1,400)), squeeze(traj(3, ii,1,400)),'k.', 'markersize', 30);
+        plot3(squeeze(traj(1, ii,2,400)), squeeze(traj(2, ii,2,400)), squeeze(traj(3, ii,2,400)),'k.', 'markersize', 30);
+  
+end
+
+%% 
+figure;
+for ii = 1:14
+        plot(squeeze(traj(1, ii,1,:)), squeeze(traj(2, ii,1,:)),'-', 'color', cc(ii,:), 'linewidth', 2);
+        hold on
+        plot(squeeze(traj(1, ii,2,:)), squeeze(traj(2, ii,2,:)),'--', 'color', cc(ii,:), 'linewidth', 2);
+        
+        plot(squeeze(traj(1, ii,1,400)), squeeze(traj(2, ii,1,400)),'k.', 'markersize', 30);
+        plot(squeeze(traj(1, ii,2,400)), squeeze(traj(2, ii,2,400)),'k.', 'markersize', 30);
+end
+
+title('Direction-color')
+
+figure;
+for ii = 1:14
+        plot(squeeze(traj(1, ii,1,:)), squeeze(traj(3, ii,1,:)),'-', 'color', cc(ii,:), 'linewidth', 2);
+        hold on
+        plot(squeeze(traj(1, ii,2,:)), squeeze(traj(3, ii,2,:)),'--', 'color', cc(ii,:), 'linewidth', 2);
+        
+        plot(squeeze(traj(1, ii,1,400)), squeeze(traj(3, ii,1,400)),'k.', 'markersize', 30);
+        plot(squeeze(traj(1, ii,2,400)), squeeze(traj(3, ii,2,400)),'k.', 'markersize', 30);
+end
+
+title('Direction-context')
+
+figure;
+for ii = 1:14
+        plot(squeeze(traj(2, ii,1,:)), squeeze(traj(3, ii,1,:)),'-', 'color', cc(ii,:), 'linewidth', 2);
+        hold on
+        plot(squeeze(traj(2, ii,2,:)), squeeze(traj(3, ii,2,:)),'--', 'color', cc(ii,:), 'linewidth', 2);
+        
+        plot(squeeze(traj(2, ii,1,400)), squeeze(traj(3, ii,1,400)),'k.', 'markersize', 30);
+        plot(squeeze(traj(2, ii,2,400)), squeeze(traj(3, ii,2,400)),'k.', 'markersize', 30);
+end
+
+title('Context-color')
+ 
+X1(1) = dot(V(:,3), V(:,7)) % Choice and color
+X1(2) = dot(V(:,3), V(:,10)) % Choice and context
+X1(3) = dot(V(:,7), V(:,10)) % Context and Color

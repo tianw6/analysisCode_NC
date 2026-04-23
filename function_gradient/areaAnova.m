@@ -1,0 +1,368 @@
+% Tibs v-probe: 3577
+% Vinnie v-probe: 517: 
+% Vinnie npix: 190; 
+% Tibs npix pmd: 690
+% Ziggy v-probe: 394
+
+
+% a = xlsread('insert_locations.xlsx');
+
+% grid 6: 8.5mm; grid 8:12mm  
+
+clear;clc 
+opts = detectImportOptions('insert_locations.xlsx');
+
+% Set column types
+% 'string' for text columns
+% 'double' for numeric columns
+opts.VariableTypes{1} = 'string';   % 1st column string
+opts.VariableTypes{2} = 'double';   % 2nd column number
+opts.VariableTypes{3} = 'double';   % 3rd column number
+opts.VariableTypes{4} = 'double';   % 4th column number
+opts.VariableTypes{6} = 'string';   % 6th column string
+
+% Read the table with specified options
+data = readtable('insert_locations.xlsx', opts);
+
+monkey = data{:,6};    % 1st column strings
+
+channel = data{:,2};
+areaUp = data{:,3};
+areaDown = data{:,4};
+bound = data{:,8};
+boundDown = data{:,9};
+
+
+
+%% 
+
+area8 = [];
+dlpfcD = [];
+dlpfcV = [];
+dlpfcA = [];
+pmd = [];
+
+
+Tibs = load('/Users/tianwang/Documents/MATLAB/ChandLab/DLPFC_analysis/createDataInfo/DLPFC_neurons.mat').database;
+Ziggy = load('/Users/tianwang/Documents/MATLAB/ChandLab/Ziggy_DLPFC/createDataInfo/DLPFC_neurons.mat').database;
+Vinnie = load('/Users/tianwang/Documents/MATLAB/ChandLab/Vinnie_DLPFC/createDataInfo/DLPFC_neurons.mat').database;
+
+
+T1 = struct2table(Tibs);
+V1 = struct2table(Vinnie);
+Z1 = struct2table(Ziggy);
+
+c = [T1(:,1); V1(:,1); Z1(:,1)];
+
+Channels = table2struct(c);
+
+cnt = 1;
+
+% area 8 unit num
+for ii = 1:length(Channels)
+    
+    dur = length(Channels(ii).channelID); 
+    
+    if (areaUp(ii) == 4 & channel(ii) == 32)
+        area8 = [area8 (cnt: cnt + dur - 1)]; 
+    end
+
+    cnt = cnt + dur;
+end
+
+% dlpfcD unit num
+
+cnt = 1;
+for ii = 1:length(Channels)
+    
+    dur = length(Channels(ii).channelID); 
+    
+    if (areaUp(ii) == 3 & channel(ii) == 32 & ~isnan(bound(ii)))
+        dlpfcD = [dlpfcD (cnt: cnt + dur - 1)]; 
+    end
+
+    cnt = cnt + dur;
+end
+
+
+% dlpfcV unit num
+cnt = 1;
+for ii = 1:length(Channels)
+    
+    dur = length(Channels(ii).channelID); 
+    
+    if (areaUp(ii) == 2 & channel(ii) == 32 & ~isnan(bound(ii)))
+        dlpfcV = [dlpfcV (cnt: cnt + dur - 1)]; 
+    end
+
+    cnt = cnt + dur;
+end
+
+
+% dlpfcA unit num
+
+cnt = 1;
+for ii = 1:length(Channels)
+    
+    dur = length(Channels(ii).channelID); 
+    
+    if (areaUp(ii) == 1)
+        dlpfcA = [dlpfcA (cnt: cnt + dur - 1)]; 
+    end
+
+    cnt = cnt + dur;
+end
+
+%% vprobe session with half dlpfcD half dlpfcV
+
+cnt = 1;
+
+for ii = 1:length(Tibs)
+
+    channelID = Channels(ii).channelID; 
+    dur = length(channelID); 
+
+    temp = cnt : cnt + dur - 1;
+    if (channel(ii) ~= 32 & areaUp(ii) == 3 & areaDown(ii) == 2 )
+        
+        thresh = channel(ii);
+        
+        dlpfcD = [dlpfcD temp(channelID <= thresh)];
+        
+        dlpfcV = [dlpfcV temp(channelID > thresh)];
+
+    end
+    
+    cnt = cnt + dur;
+    
+    
+end
+
+
+%% add npix 
+
+Vnpix = dir('/Volumes/TianSSD/VinnieNpix/waveforms/*.mat');
+
+TnpixPFC = dir('/Volumes/TianSSD/TiberiusNpix/waveforms/*DLPFC*.mat');
+
+TnpixPMD = dir('/Volumes/TianSSD/TiberiusNpix/waveforms/*PMD*.mat');
+
+
+npix = [Vnpix; TnpixPFC; TnpixPMD];
+
+% add vinnie
+cnt = 3577+517+394+1;
+
+for ii = 1:length(npix)
+    
+    npix1Day = load([npix(ii).folder '/' npix(ii).name]).goodUnits;
+    
+    dur = length(npix1Day);
+    
+    if (areaUp(ii + 181) == 1 )
+        dlpfcA = [dlpfcA (cnt: cnt + dur - 1)]; 
+    end
+    
+    if (areaUp(ii + 181) == 2 )
+        dlpfcV = [dlpfcV (cnt: cnt + dur - 1)]; 
+    end  
+    
+    if (areaUp(ii + 181) == 3 & channel(ii + 181) == 384)
+        dlpfcD = [dlpfcD (cnt: cnt + dur - 1)]; 
+        length((cnt: cnt + dur - 1))
+        ii
+    end    
+
+    if (areaUp(ii + 181) == 5 )
+        pmd = [pmd (cnt: cnt + dur - 1)]; 
+    end 
+    
+    
+    % add 5 sessions of 
+    if (channel(ii+181) ~= 384 & areaUp(ii+181) == 3 & areaDown(ii+181) == 2)
+        temp = cnt: cnt  + dur - 1;
+        rawThresh = channel(ii+181);
+       
+        channelID = [npix1Day.depth];
+        depth1 = 7680:-20:0;
+        thresh = depth1(rawThresh);
+        
+        dlpfcD = [dlpfcD temp(channelID >= thresh)];
+        length(temp(channelID >= thresh))
+        ii
+        
+        dlpfcV = [dlpfcV temp(channelID < thresh)];        
+    end
+    
+    
+    cnt = cnt + dur;
+    
+end
+
+
+%% 
+
+load('/Users/tianwang/Documents/MATLAB/ChandLab/DLPFC_PMD/geometry/single_unit_mix_selectivity/ESresultsAll.mat');
+
+
+
+%% 
+
+thres = 0.01;
+
+p_all = [];
+cnt = 1;
+for id = 1:length(results)
+    temp = results(id).anovaResults;
+    for idx = 1:length(temp)
+        p_all(:,:,cnt) = temp(idx).anova2R;
+        cnt = cnt+1;
+    end
+end
+
+
+sigP = p_all < thres;
+
+
+%% plot
+
+t = -100:5:400;
+
+figure('Position', [10 10 1400 600])
+
+% area8 
+anova8 = sigP(:,:,area8);
+sigPer8 = (sum(anova8,3)./size(anova8,3));
+subplot(2,4,3); hold on
+plot(t, sigPer8(1,:), 'm')
+plot(t, sigPer8(2,:), 'b')
+plot(t, sigPer8(3,:), 'k')
+mixP = squeeze(sum(anova8,1) > 1);
+mixP8 = sum(mixP,2)./size(anova8,3);
+plot(t, mixP8, 'linewidth', 2);
+title('area 8')
+ylim([0 0.6])
+
+% dlpfcD
+anovaD = sigP(:,:,dlpfcD);
+sigPerD = (sum(anovaD,3)./size(anovaD,3));
+subplot(2,4,2); hold on
+plot(t, sigPerD(1,:), 'm')
+plot(t, sigPerD(2,:), 'b')
+plot(t, sigPerD(3,:), 'k')
+mixP = squeeze(sum(anovaD,1) > 1);
+mixPD = sum(mixP,2)./size(anovaD,3);
+plot(t, mixPD, 'linewidth', 2);
+title('dlpfcD')
+ylim([0 0.6])
+
+% dlpfcV
+anovaV = sigP(:,:,dlpfcV);
+sigPerV = (sum(anovaV,3)./size(anovaV,3));
+subplot(2,4,6); hold on
+plot(t, sigPerV(1,:), 'm')
+plot(t, sigPerV(2,:), 'b')
+plot(t, sigPerV(3,:), 'k')
+mixP = squeeze(sum(anovaV,1) > 1);
+mixPV = sum(mixP,2)./size(anovaV,3);
+plot(t, mixPV, 'linewidth', 2);
+title('dlpfcV')
+ylim([0 0.6])
+
+
+% dlpfcA
+anovaA = sigP(:,:,dlpfcA);
+sigPerA = (sum(anovaA,3)./size(anovaA,3));
+subplot(2,4,1); hold on
+plot(t, sigPerA(1,:), 'm')
+plot(t, sigPerA(2,:), 'b')
+plot(t, sigPerA(3,:), 'k')
+mixP = squeeze(sum(anovaA,1) > 1);
+mixPA = sum(mixP,2)./size(anovaA,3);
+plot(t, mixPA, 'linewidth', 2);
+title('dlpfcA')
+ylim([0 0.6])
+
+% pmd
+anovaP = sigP(:,:,pmd);
+sigPerP = (sum(anovaP,3)./size(anovaP,3));
+subplot(2,4,4); hold on
+plot(t, sigPerP(1,:), 'm')
+plot(t, sigPerP(2,:), 'b')
+plot(t, sigPerP(3,:), 'k')
+mixP = squeeze(sum(anovaP,1) > 1);
+mixPP = sum(mixP,2)./size(anovaP,3);
+plot(t, mixPP, 'linewidth', 2);
+title('pmd')
+ylim([0 0.6])
+
+
+%% bar graph
+
+selectT = (t > 150 & t <= 250);
+
+y = [
+    
+[mean(sigPerA(:,selectT), 2)' mean(mixPA(selectT), 1)]; 
+[mean(sigPerV(:,selectT), 2)' mean(mixPV(selectT), 1)];
+[mean(sigPerD(:,selectT), 2)' mean(mixPD(selectT), 1)];
+[mean(sigPer8(:,selectT), 2)' mean(mixP8(selectT), 1)];
+[mean(sigPerP(:,selectT), 2)' mean(mixPP(selectT), 1)]
+
+];
+
+
+X = categorical({'9/46 Anterior','9/46 Deep','9/46 Superficial','Area 8', 'PMd'});
+X = reordercats(X,{'9/46 Anterior', '9/46 Deep','9/46 Superficial','Area 8', 'PMd'});
+
+
+figure
+bh = bar(X, y)
+
+
+ylabel("modulation percentage")
+title([ 'num units: ' mat2str([size(anovaA,3), size(anovaV,3), size(anovaD,3), size(anova8,3), size(anovaP,3)])])
+TestL={'color','dir','cxt', 'mixed'};
+legend(bh, TestL, 'location', 'best') %'northwest'
+
+
+%% 
+
+
+temp = y.*(1-y);
+
+dataErr(1,:) = sqrt(temp(1,:)./size(anovaA,3))
+dataErr(2,:) = sqrt(temp(2,:)./size(anovaV,3))
+dataErr(3,:) = sqrt(temp(3,:)./size(anovaD,3))
+dataErr(4,:) = sqrt(temp(4,:)./size(anova8,3))
+dataErr(5,:) = sqrt(temp(5,:)./size(anovaP,3))
+
+dataCI = dataErr;
+figure('position', [1000,1000,600,300]); hold on
+
+X = categorical({'9/46 Anterior','9/46 Deep','9/46 Superficial','Area 8', 'pmd'});
+X = reordercats(X,{'9/46 Anterior', '9/46 Deep','9/46 Superficial','Area 8', 'pmd'});
+
+b = bar(X,y, 'grouped');
+% Calculate the number of groups and number of bars in each group
+[ngroups,nbars] = size(y);
+% Get the x coordinate of the bars
+x = nan(nbars, ngroups);
+for i = 1:nbars
+    x(i,:) = b(i).XEndPoints;
+end
+% Plot the errorbars
+errorbar(x',y,dataCI,'k','linestyle','none', 'linewidth', 1.5);
+hold off
+
+
+ylabel("modulation percentage")
+title([ 'num units: ' mat2str([size(anovaA,3), size(anovaV,3), size(anovaD,3), size(anova8,3), size(anovaP,3)])])
+TestL={'color','dir','cxt', 'mixed'};
+legend(b, TestL, 'location', 'best') %'northwest'
+
+ylim([0 0.18])
+
+
+%% chi square test
+
