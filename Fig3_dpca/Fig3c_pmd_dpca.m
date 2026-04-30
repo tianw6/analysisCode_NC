@@ -6,7 +6,7 @@ clear all; close all;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%% path of all dpca core code %%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-addpath("../utils/dPCA/matlab");
+addpath("../utils/dPCA/");
 
 
 
