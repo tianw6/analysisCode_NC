@@ -4,6 +4,9 @@
 
 clear all; clc; close all
 
+addpath(genpath("../utils/dPCA/"))
+
+
 modelName = 'rotating_input_symmetric';
 
 

@@ -6,6 +6,9 @@
 
 clear; close all;
 
+addpath(genpath("../utils/dPCA/"))
+
+
 %% Setup
 rotation_angles = 0:5:360;  % Sweep from 0 to 360 in 10-degree steps
 n_angles = length(rotation_angles);

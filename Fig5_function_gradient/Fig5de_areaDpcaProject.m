@@ -3,6 +3,8 @@
 
 clear;clc 
 
+addpath('../utils/dPCA/')
+
 load('areaUnitNums');
 area8 = areaUnitNums.area8;
 dlpfcD = areaUnitNums.dlpfcD;
