@@ -6,24 +6,21 @@
 
 clear; clc; close all
 
-addpath('..')
+addpath('../../utils/')
 
 
-%% for dlpfc Data
-a = load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Tiberius/checkerboardAligned/allBinFRnpix.mat').allBinFR;
-
-
-
-b = load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Vinnie/checkerboardAligned/allBinFRnpix.mat').allBinFR;
-c = load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Tiberius/checkerboardAligned/allBinFRvprobe.mat').allBinFR;
-d = load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Vinnie/checkerboardAligned/allBinFRvprobe.mat').allBinFR;
+%% load dlpfc Data
+a = load('../../../analysisData_NC/Fig4/Tiberius/checkerboardAligned/allBinFRnpix.mat').allBinFR;
+b = load('../../../analysisData_NC/Fig4/Vinnie/checkerboardAligned/allBinFRnpix.mat').allBinFR;
+c = load('../../../analysisData_NC/Fig4/Tiberius/checkerboardAligned/allBinFRvprobe.mat').allBinFR;
+d = load('../../../analysisData_NC/Fig4/Vinnie/checkerboardAligned/allBinFRvprobe.mat').allBinFR;
 
 binFRpfc = [c,a,d,b];
 
-%% for pmd data
-a = load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Tiberius/checkerboardAligned/allBinFRnpixPMD.mat').allBinFR;
-b = load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Tiberius/checkerboardAligned/allBinFRvprobePMD.mat').allBinFR;
-c = load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Olaf/checkerboardAligned/allBinFRvprobePMD.mat').allBinFR;
+%% load pmd data
+a = load('../../../analysisData_NC/Fig4/Tiberius/checkerboardAligned/allBinFRnpixPMD.mat').allBinFR;
+b = load('../../../analysisData_NC/Fig4/Tiberius/checkerboardAligned/allBinFRvprobePMD.mat').allBinFR;
+c = load('../../../analysisData_NC/Fig4/Olaf/checkerboardAligned/allBinFRvprobePMD.mat').allBinFR;
 
 
 binFRpmd = [a b c];

@@ -11,7 +11,7 @@ area = 'pfc';
 switch area
     case {'pfc'}
         % load dlpfc
-        load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Tiberius/checkerboardAligned/allBinFRnpix.mat');
+        load('../../../analysisData_NC/Fig4/Tiberius/checkerboardAligned/allBinFRnpix.mat');
 
 
         temp = allBinFR;
@@ -22,7 +22,7 @@ switch area
         allBinFR = temp;
 
 
-        a = load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Vinnie/checkerboardAligned/allBinFRnpix.mat').allBinFR;
+        a = load('../../../analysisData_NC/Fig4/Vinnie/checkerboardAligned/allBinFRnpix.mat').allBinFR;
 
         allBinFR = [allBinFR, a];
 
@@ -30,7 +30,7 @@ switch area
     case {'pmd'}
     % load pmd
 
-    load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Tiberius/checkerboardAligned/allBinFRnpixPMD.mat');
+    load('../../../analysisData_NC/Fig4/Tiberius/checkerboardAligned/allBinFRnpixPMD.mat');
 
 end
 %%

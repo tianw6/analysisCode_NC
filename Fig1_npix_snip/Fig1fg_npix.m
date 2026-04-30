@@ -2,7 +2,7 @@
 % This code generates Fig1f-g
 
 %% Fig1f: plot snipset of recodings
-load("0821snip.mat");
+load("../../analysisData_NC/Fig1/0821snip.mat");
 figure('units','normalized','outerposition',[0 1 1 1])
 hold on
 for ii = 1:size(data,1)

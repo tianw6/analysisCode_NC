@@ -10,7 +10,7 @@ AP = X(:,1);
 Depth = X(:,2);
 %%
 
-load('/Users/tianwang/Documents/MATLAB/ChandLab/DLPFC_PMD/geometry/single_unit_mix_selectivity/ESresultsAll.mat');
+load('../Fig2_PSTH/FigS2_single_unit_MI/ESresultsAll.mat');
 
 thres = 0.01;
 

@@ -7,7 +7,7 @@ clear; close all; clc
 addpath('../../utils/')
 
 %% load dlpfc
-load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Tiberius/checkerboardAligned/allBinFRnpix.mat');
+load('../../../analysisData_NC/Fig4/Tiberius/checkerboardAligned/allBinFRnpix.mat');
 
 
 temp = allBinFR;
@@ -18,7 +18,7 @@ temp(19) = [];
 allBinFR = temp;
 
 
-a = load('/Users/tianwang/Documents/MATLAB/ChandLab/TFBinFRdata/Vinnie/checkerboardAligned/allBinFRnpix.mat').allBinFR;
+a = load('../../../analysisData_NC/Fig4/Vinnie/checkerboardAligned/allBinFRnpix.mat').allBinFR;
 
 allBinFR = [allBinFR, a];
 
